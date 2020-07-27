@@ -1,0 +1,115 @@
+---
+title: "Part 3"
+author: "Peter Kiragu"
+date: "7/24/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+install.packages("arules")
+
+```{r}
+library(arules)
+
+transactions <- read.transactions("Supermarket_Dataset 3.csv", sep = ",")
+
+head(transactions)
+```
+```{r}
+# Checking the class of our object
+class(transactions)
+
+```
+```{r}
+# Inspecting the first four transactions
+
+inspect(transactions[1:4])
+```
+```{r}
+# Preview the items that make up our dataset
+
+items<-as.data.frame(itemLabels(transactions))
+
+colnames(items) <- "Item"
+
+head(items, 10)  
+```
+```{r}
+# Summary of transactions
+
+summary(transactions)
+```
+```{r}
+# Exploring the frequency of some articles
+
+itemFrequency(transactions[, 8:10],type = "absolute")
+
+round(itemFrequency(transactions[, 8:10],type = "relative")*100,2)
+```
+
+```{r}
+#Displaying top 10 most common items in the transactions dataset 
+
+par(mfrow = c(1, 2))
+
+# plot the frequency of items
+itemFrequencyPlot(transactions, topN = 10,col="darkgreen")
+
+itemFrequencyPlot(transactions, support = 0.1,col="darkred")
+
+```
+```{r}
+# Building a model based on association rules using the apriori function
+
+rules <- apriori (transactions, parameter = list(supp = 0.001, conf = 0.8))
+
+rules
+```
+
+```{r}
+# Building a apriori model with Min Support as 0.002 and confidence as 0.8.
+
+rules2 <- apriori (transactions,parameter = list(supp = 0.002, conf = 0.8))
+
+rules2         
+```
+
+```{r}
+# Building apriori model with Min Support as 0.002 and confidence as 0.6.
+rules3 <- apriori (transactions, parameter = list(supp = 0.001, conf = 0.6)) 
+
+rules3
+```
+```{r}
+# Getting a summary of the rules
+summary(rules)
+```
+```{r}
+# Observing rules built in our model. Displaying first 5 model rules
+
+inspect(rules[1:5])
+
+```
+```{r}
+# Ordering the rules by support
+
+rules<-sort(rules, by="support", decreasing=FALSE)
+
+inspect(rules[1:5])
+
+```
+```{r}
+#Trying to see items that the customers bought before purchasing milk
+
+milk <- subset(rules, subset = rhs %pin% "milk")
+
+# Then order by confidence
+
+milk <-sort(milk, by="confidence", decreasing=TRUE)
+
+inspect(milk[1:5])
+
+```
