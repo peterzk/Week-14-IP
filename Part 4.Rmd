@@ -1,0 +1,66 @@
+---
+title: "Part 4"
+author: "Peter Kiragu"
+date: "7/24/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# Loading the required packages
+
+library(tidyverse)
+library(anomalize)
+
+```
+```{r}
+# Loading the dataset
+
+supermarket <- read.csv("Supermarket_4.csv")
+
+head(supermarket)
+
+```
+
+
+## Checking the Dataset
+
+```{r}
+# checking the dimension of the dataset
+dim(supermarket)
+
+# Dataset has two columns and 1000 rows
+```
+```{r}
+# Summary of the dataset
+
+summary(supermarket)
+```
+## Anomaly Detection
+
+```{r}
+# Checking the anomaly
+
+supermarket_df <- as_tibble(supermarket)
+
+anomalize(supermarket_df, Sales, method = c("iqr", "gesd"), alpha = 0.05,
+  max_anoms = 0.2, verbose = FALSE)
+
+```
+
+```{r}
+library(tibbletime)
+
+
+supermarket_df$Date <- as_tbl_time(supermarket_df, index = 'Date')
+supermarket_df %>%
+    time_decompose(count) %>%
+    anomalize(remainder) %>%
+    time_recompose() %>%
+    plot_anomalies(time_recomposed = TRUE, ncol = 3, alpha_dots = 0.5)
+
+```
+
