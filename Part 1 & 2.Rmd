@@ -93,6 +93,8 @@ ggbiplot(supermarket.pca)
 ggbiplot(supermarket.pca, labels=rownames(supermarket_one), obs.scale = 1, var.scale = 1)
 
 ```
+## Part 2
+
 ## Feature Selection Techniques
 
 ### Filter Method
