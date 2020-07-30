@@ -9,3 +9,123 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r}
+
+#Loading the dataset
+
+supermarket_one <- read.csv("Supermarket_Dataset.csv")
+
+head(supermarket_one)
+```
+```{r}
+# Checking the dimension of the dataset
+
+dim(supermarket_one)
+```
+
+```{r}
+# Checking structure of the dataset
+
+str(supermarket_one)
+```
+
+```{r}
+# To be able to do PCA you need to have numerical values for all the columns 
+
+# Label Encoding the categorical variables
+
+library(CatEncoders)
+
+
+for (i in c(2:5, 11)) {
+  
+  encode = LabelEncoder.fit(supermarket_one[,i])
+  supermarket_one[,i] = transform(encode, supermarket_one[,i])
+}
+
+head(supermarket_one)
+```
+## Dropping the Uncessary columns
+
+```{r}
+supermarket_one$Invoice.ID <- NULL
+supermarket_one$Date <- NULL
+supermarket_one$Time <- NULL
+
+head(supermarket_one)
+
+```
+
+## Dimensionality Reduction
+```{r}
+# Removing zero variance columns so that we can do dimensionality reduction
+
+supermarket_one <- supermarket_one[ , which(apply(supermarket_one, 2, var) != 0)]
+
+```
+
+
+```{r}
+# Implementing PCA
+
+supermarket.pca <- prcomp(supermarket_one, center = TRUE, scale. = TRUE)
+
+summary(supermarket.pca)
+
+# We can see that the principle components are ranked in terms of their variance with PCA1 having a variance of 41.07%
+```
+```{r}
+# Checking the structure of the principal components 
+
+str(supermarket.pca)
+```
+```{r}
+library(devtools)
+library(usethis)
+library(ggbiplot)
+
+ggbiplot(supermarket.pca)
+
+```
+```{r}
+# Adding more detail to the plot, we provide arguments rownames as labels
+
+ggbiplot(supermarket.pca, labels=rownames(supermarket_one), obs.scale = 1, var.scale = 1)
+
+```
+## Feature Selection Techniques
+
+### Filter Method
+
+```{r}
+library(caret)
+library(corrplot)
+
+# Correlations Matrix
+correlationMatrix <- cor(supermarket_one)
+correlationMatrix
+```
+```{r}
+# Checking the highly correlated features
+
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff = 0.75)
+names(supermarket_one[,highlyCorrelated])
+
+# Three columns are higly correlated and these are cogs, total, tax columns
+```
+```{r}
+# Removing Redundant Features 
+
+supermarket_one.2 <- supermarket_one[-highlyCorrelated]
+
+head(supermarket_one.2)
+```
+```{r}
+# Performing our graphical comparison
+
+par(mfrow = c(1, 2))
+
+corrplot(correlationMatrix, order = "hclust")
+corrplot(cor(supermarket_one), order = "hclust")
+```
+
